@@ -9,3 +9,4 @@ venv/
 # Data
 data/
 recall_db/
+*.log
