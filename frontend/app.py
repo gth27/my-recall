@@ -223,15 +223,24 @@ if final_results:
                 image = Image.open(full_path)
                 st.image(image, use_container_width=True)
                 
-                if item['type'] == "🔍 Text Match":
-                    st.success(f"Text Match")
+                # BADGE LOGIC
+                if item['type'] == "Text Match":
+                    st.success(f"Matched: \"{query}\"")
                 elif item.get('score'):
                     st.caption(f"Confidence: {item['score']:.2f}")
                 else:
                     st.caption(f"Timeline")
 
-                with st.expander("Details"):
-                    st.text(item['text'][:300])
+                # TEXT EXPANDER (FIXED)
+                with st.expander("See OCR Text"):
+                    # 1. Show the full text (no more [:300] limit)
+                    full_text = item['text']
+                    st.text(full_text)
+                    
+                    # 2. Debug Helper: Show where the match happened
+                    if query and query.lower() in full_text.lower():
+                        start = full_text.lower().find(query.lower())
+                        st.caption(f"Match found at character {start}")
                     
             except Exception:
                 st.error("Image not found")
