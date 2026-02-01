@@ -67,34 +67,40 @@ class RecallWatcher:
             return
 
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        temp_filename = "temp_capture.png"
+        temp_filename = "temp_capture.jpeg"
         temp_path = os.path.join(STORAGE_PATH, temp_filename)
 
         try:
             if not self.is_safe_to_capture():
                 return
 
+            # FIX 1: Added timeout=5. If grim hangs, we kill it and move on.
             subprocess.run(
-                ["grim", "-t", "png", "-l", "0", temp_path], 
+                ["grim", "-t", "jpeg", "-q", "80", temp_path], 
                 check=True, 
-                stderr=subprocess.DEVNULL
+                stderr=subprocess.DEVNULL,
+                timeout=5
             )
 
-            img = Image.open(temp_path)
-            current_hash = imagehash.phash(img)
+            # FIX 2: Use 'with' to ensure file is closed before renaming
+            # This prevents file locking issues
+            with Image.open(temp_path) as img:
+                current_hash = imagehash.phash(img)
 
             if self.last_hash is not None:
                 diff = current_hash - self.last_hash
                 if diff < CONFIG['similarity_threshold']:
                     return
 
-            final_filename = f"{timestamp}.png"
+            final_filename = f"{timestamp}.jpeg"
             final_path = os.path.join(STORAGE_PATH, final_filename)
             os.rename(temp_path, final_path)
             
             self.last_hash = current_hash
             logger.info(f"Saved: {final_filename}")
 
+        except subprocess.TimeoutExpired:
+            logger.warning("Capture timed out (Grim hung). Retrying next cycle.")
         except subprocess.CalledProcessError:
             logger.error("Capture failed. Is Hyprland running?")
         except Exception as e:

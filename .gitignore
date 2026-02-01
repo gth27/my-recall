@@ -10,4 +10,4 @@ venv/
 data/
 recall_db/
 *.log
-*.log
+
