@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+
+# Docker / Environment
+.env
+
+# Data
+data/
+recall_db/

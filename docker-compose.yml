@@ -1,0 +1,67 @@
+services:
+  # 1. Relational DB (Metadata, OCR Text)
+  postgres:
+    image: postgres:15-alpine
+    container_name: recall_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: recall_user
+      POSTGRES_PASSWORD: recall_password
+      POSTGRES_DB: recall_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      - recall_net
+
+  # 2. Vector DB (Semantic Search)
+  qdrant:
+    image: qdrant/qdrant
+    container_name: recall_qdrant
+    restart: always
+    ports:
+      - "6333:6333"
+    volumes:
+      - ./data/qdrant:/qdrant/storage
+    networks:
+      - recall_net
+
+  # 3. Backend
+  backend:
+    build: ./backend
+    container_name: recall_backend
+    restart: always
+    volumes:
+      - ./backend:/app 
+      - ./data:/data
+    depends_on:
+      - postgres
+      - qdrant
+    environment:
+      POSTGRES_URL: "postgresql://recall_user:recall_password@postgres:5432/recall_db"
+      QDRANT_URL: "http://qdrant:6333"
+    networks:     
+      - recall_net
+    
+  frontend:
+    build: ./frontend
+    container_name: recall_frontend
+    restart: always
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./frontend:/app
+      - ./data:/data
+    depends_on:
+      - postgres
+      - qdrant
+    environment:
+      POSTGRES_URL: "postgresql://recall_user:recall_password@postgres:5432/recall_db"
+      QDRANT_URL: "http://qdrant:6333"
+    networks:
+      - recall_net
+
+networks:
+  recall_net:
+    driver: bridge

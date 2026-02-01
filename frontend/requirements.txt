@@ -1,0 +1,8 @@
+streamlit
+pandas
+psycopg2-binary
+sqlalchemy
+qdrant-client==1.7.3
+sentence-transformers
+Pillow
+numpy<2.0.0

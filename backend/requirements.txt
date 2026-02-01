@@ -1,0 +1,14 @@
+# Database
+sqlalchemy
+psycopg2-binary
+qdrant-client==1.7.3
+
+# AI / Processing
+paddlepaddle==2.6.2
+paddleocr==2.6.1.3
+sentence-transformers
+Pillow
+python-dotenv
+protobuf==3.20.3
+
+numpy<2.0.0

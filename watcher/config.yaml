@@ -1,0 +1,6 @@
+storage_path: "../data/inbox"
+capture_interval: 5.0
+similarity_threshold: 3
+window_blacklist:
+  - "Incognito"
+  - "Private Browsing"
